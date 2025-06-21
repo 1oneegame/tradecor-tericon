@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { spawn } from 'child_process';
 import path from 'path';
-import fs from 'fs';
 
 export async function POST(req: Request) {
     const startTime = Date.now();
@@ -17,84 +16,51 @@ export async function POST(req: Request) {
 
         const scriptDir = path.join(process.cwd(), 'analyze-the-lots');
         const pythonScript = path.join(scriptDir, 'example_predict.py');
-        const inputFile = path.join(scriptDir, 'new_data.json');
-        const outputFile = path.join(scriptDir, 'predictions.json');
-
-        console.log('[Analysis API] Файлы:', {
-            scriptDir,
-            pythonScript,
-            inputFile,
-            outputFile,
-            uploadedFile: file.name,
-            workingDirectory: process.cwd()
-        });
-
-        if (!fs.existsSync(pythonScript)) {
-            throw new Error(`Python скрипт не найден: ${pythonScript}`);
-        }
-
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        fs.writeFileSync(inputFile, buffer);
-        console.log('[Analysis API] Файл сохранен:', inputFile);
 
         console.log('[Analysis API] Запуск Python скрипта');
-        await new Promise((resolve, reject) => {
+        
+        // Читаем данные файла в память
+        const bytes = await file.arrayBuffer();
+        const fileContent = Buffer.from(bytes).toString('utf-8');
+
+        const outputData = await new Promise<string>((resolve, reject) => {
             const pythonProcess = spawn('python', [pythonScript], {
                 cwd: scriptDir
             });
 
-            let outputData = '';
-            let errorData = '';
+            let stdout = '';
+            let stderr = '';
+
+            // Отправляем данные в stdin Python процесса
+            pythonProcess.stdin.write(fileContent);
+            pythonProcess.stdin.end();
 
             pythonProcess.stdout.on('data', (data) => {
-                const output = data.toString();
-                outputData += output;
-                console.log('[Python Output]', output);
+                stdout += data.toString();
+                console.log('[Python Output]', data.toString());
             });
 
             pythonProcess.stderr.on('data', (data) => {
-                const error = data.toString();
-                errorData += error;
-                console.error('[Python Error]', error);
+                stderr += data.toString();
+                console.error('[Python Error]', data.toString());
             });
 
             pythonProcess.on('close', (code) => {
                 console.log('[Analysis API] Python процесс завершился с кодом:', code);
                 if (code !== 0) {
-                    reject(new Error(`Python process exited with code ${code}\n${errorData}`));
+                    reject(new Error(`Python process exited with code ${code}\n${stderr}`));
                 } else {
-                    resolve(outputData);
+                    resolve(stdout);
                 }
             });
         });
 
-        console.log('[Analysis API] Чтение результатов анализа');
-        let predictions = null;
-        if (fs.existsSync(outputFile)) {
-            predictions = JSON.parse(fs.readFileSync(outputFile, 'utf-8'));
-        } else {
-            console.error('[Analysis API] Файл с результатами не найден:', outputFile);
-        }
-
-        // Удаляем входной файл после завершения анализа
-        try {
-            if (fs.existsSync(inputFile)) {
-                fs.unlinkSync(inputFile);
-                console.log('[Analysis API] Входной файл удален:', inputFile);
-            }
-            if (fs.existsSync(outputFile)) {
-                fs.unlinkSync(outputFile);
-                console.log('[Analysis API] Выходной файл удален:', outputFile);
-            }
-        } catch (deleteError) {
-            console.error('[Analysis API] Ошибка при удалении файлов:', deleteError);
-        }
-
         const endTime = Date.now();
         const executionTime = (endTime - startTime) / 1000;
         console.log(`[Analysis API] Запрос обработан успешно за ${executionTime} секунд`);
+
+        // Предполагаем, что Python скрипт вернул JSON в stdout
+        const predictions = JSON.parse(outputData);
 
         return NextResponse.json({ 
             success: true,
@@ -106,22 +72,6 @@ export async function POST(req: Request) {
         const executionTime = (endTime - startTime) / 1000;
         console.error('[Analysis API] Ошибка при обработке запроса:', error);
         console.log(`[Analysis API] Запрос завершился с ошибкой за ${executionTime} секунд`);
-
-        // Удаляем входной файл даже в случае ошибки
-        try {
-            const inputFile = path.join(process.cwd(), 'analyze-the-lots', 'new_data.json');
-            const outputFile = path.join(process.cwd(), 'analyze-the-lots', 'predictions.json');
-            if (fs.existsSync(inputFile)) {
-                fs.unlinkSync(inputFile);
-                console.log('[Analysis API] Входной файл удален после ошибки:', inputFile);
-            }
-            if (fs.existsSync(outputFile)) {
-                fs.unlinkSync(outputFile);
-                console.log('[Analysis API] Выходной файл удален после ошибки:', outputFile);
-            }
-        } catch (deleteError) {
-            console.error('[Analysis API] Ошибка при удалении файлов:', deleteError);
-        }
 
         return NextResponse.json({ 
             success: false, 

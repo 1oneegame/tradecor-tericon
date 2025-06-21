@@ -6,19 +6,16 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
 interface AnalysisResult {
-    lot_id: string;
-    announcement: string;
-    customer: string;
+    id: string;
     subject: string;
-    quantity: number | null;
-    amount: number | null;
-    suspicion_probability: number | null;
-    suspicion_level: string;
-    is_suspicious: number;
+    amount: number;
+    quantity: number;
+    suspicion_percentage: number;
+    suspicion_level: 'High' | 'Medium' | 'Low';
 }
 
 type SortType = 'probability_asc' | 'probability_desc' | 'level';
-type SuspicionLevel = 'all' | 'Высокий' | 'Средний' | 'Низкий';
+type SuspicionLevel = 'all' | 'High' | 'Medium' | 'Low';
 
 export default function Analysis() {
     const [loading, setLoading] = useState(false);
@@ -47,8 +44,8 @@ export default function Analysis() {
         }
     };
 
-    const formatAmount = (amount: number | null) => {
-        if (amount === null) return 'Не указано';
+    const formatAmount = (amount: number | null | undefined) => {
+        if (amount === null || amount === undefined || isNaN(amount)) return 'Не указано';
         return new Intl.NumberFormat('ru-RU', {
             style: 'decimal',
             minimumFractionDigits: 2,
@@ -56,30 +53,30 @@ export default function Analysis() {
         }).format(amount);
     };
 
-    const formatQuantity = (quantity: number | null) => {
-        if (quantity === null) return 'Не указано';
+    const formatQuantity = (quantity: number | null | undefined) => {
+        if (quantity === null || quantity === undefined || isNaN(quantity)) return 'Не указано';
         return quantity.toString();
     };
 
-    const formatProbability = (probability: number | null) => {
-        if (probability === null) return 'Не указано';
+    const formatProbability = (probability: number | null | undefined) => {
+        if (probability === null || probability === undefined) return 'Не указано';
         return `${probability.toFixed(1)}%`;
     };
 
     const getSuspicionColor = (level: string) => {
         switch (level) {
-            case 'Высокий': return 'text-red-600';
-            case 'Средний': return 'text-yellow-600';
-            case 'Низкий': return 'text-green-600';
+            case 'High': return 'text-red-600';
+            case 'Medium': return 'text-yellow-600';
+            case 'Low': return 'text-green-600';
             default: return 'text-gray-600';
         }
     };
 
     const getLevelWeight = (level: string) => {
         switch (level) {
-            case 'Высокий': return 3;
-            case 'Средний': return 2;
-            case 'Низкий': return 1;
+            case 'High': return 3;
+            case 'Medium': return 2;
+            case 'Low': return 1;
             default: return 0;
         }
     };
@@ -94,8 +91,8 @@ export default function Analysis() {
 
         // Сортировка
         return filteredResults.sort((a, b) => {
-            const probA = a.suspicion_probability ?? 0;
-            const probB = b.suspicion_probability ?? 0;
+            const probA = a.suspicion_percentage ?? 0;
+            const probB = b.suspicion_percentage ?? 0;
 
             switch (sortType) {
                 case 'probability_asc':
@@ -231,7 +228,7 @@ export default function Analysis() {
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex-1">
                                                         <p className="font-medium">
-                                                            Лот №{result.lot_id} | {result.announcement}
+                                                            Лот №{result.id}
                                                         </p>
                                                         <p className="text-gray-600 mt-1">
                                                             {result.subject}
@@ -249,10 +246,12 @@ export default function Analysis() {
                                                     </div>
                                                     <div className="ml-4 text-right">
                                                         <p className="font-medium">
-                                                            Подозрительность: {formatProbability(result.suspicion_probability)}
+                                                            Подозрительность: {formatProbability(result.suspicion_percentage)}
                                                         </p>
                                                         <p className={`font-medium ${getSuspicionColor(result.suspicion_level)}`}>
-                                                            {result.suspicion_level}
+                                                            {result.suspicion_level === 'High' ? 'Высокий' :
+                                                             result.suspicion_level === 'Medium' ? 'Средний' :
+                                                             result.suspicion_level === 'Low' ? 'Низкий' : 'Неизвестно'}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -278,9 +277,9 @@ export default function Analysis() {
                                                 className="w-full border rounded-md px-3 py-2"
                                             >
                                                 <option value="all">Все</option>
-                                                <option value="Высокий">Высокий</option>
-                                                <option value="Средний">Средний</option>
-                                                <option value="Низкий">Низкий</option>
+                                                <option value="High">Высокий</option>
+                                                <option value="Medium">Средний</option>
+                                                <option value="Low">Низкий</option>
                                             </select>
                                         </div>
 
