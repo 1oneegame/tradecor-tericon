@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { usePythonScript } from '@/lib/hooks/usePythonScript';
 
 interface AnalysisResult {
     id: string;
@@ -26,6 +27,7 @@ export default function Analysis() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [sortType, setSortType] = useState<SortType>('probability_desc');
     const [selectedLevel, setSelectedLevel] = useState<SuspicionLevel>('all');
+    const { runScript } = usePythonScript();
 
     const addLog = (message: string) => {
         setLogs(prev => [...prev, `[${new Date().toISOString()}] ${message}`]);
@@ -121,25 +123,17 @@ export default function Analysis() {
         addLog('Начало анализа');
 
         try {
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-
             addLog('Отправка файла на сервер');
-            const response = await fetch('/api/analysis', {
-                method: 'POST',
-                body: formData,
-            });
-
-            const data = await response.json();
+            const result = await runScript(selectedFile);
             addLog('Получен ответ от сервера');
 
-            if (!data.success) {
-                throw new Error(data.error || 'Произошла ошибка при анализе');
+            if (!result.success) {
+                throw new Error(result.error || 'Произошла ошибка при анализе');
             }
 
-            setResults(data.predictions);
-            setExecutionTime(data.executionTime);
-            addLog(`Анализ успешно завершен за ${data.executionTime} секунд`);
+            setResults(result.predictions!);
+            setExecutionTime(result.execution_time);
+            addLog(`Анализ успешно завершен за ${result.execution_time} секунд`);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Произошла неизвестная ошибка';
             setError(errorMessage);
@@ -168,13 +162,13 @@ export default function Analysis() {
                                     onChange={handleFileChange}
                                     className="flex-1 rounded-full"
                                 />
-                                <Button 
+                        <Button 
                                     onClick={handleAnalysis}
                                     disabled={loading || !selectedFile}
                                     className="bg-blue-800 hover:bg-blue-600 text-white rounded-full px-4 py-2 transition-colors duration-300"
                                 >
                                     {loading ? 'Выполняется анализ...' : 'Запустить анализ'}
-                                </Button>
+                        </Button>
                             </div>
                             {selectedFile && (
                                 <p className="text-sm text-gray-600 mt-2">
@@ -193,11 +187,11 @@ export default function Analysis() {
 
                         {error && (
                             <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg">
-                                <p className="font-bold mb-2">Ошибка:</p>
-                                <pre className="whitespace-pre-wrap text-sm">
+                            <p className="font-bold mb-2">Ошибка:</p>
+                            <pre className="whitespace-pre-wrap text-sm">
                                     {error}
                                 </pre>
-                            </div>
+                                </div>
                         )}
 
                         {logs.length > 0 && (
@@ -211,7 +205,7 @@ export default function Analysis() {
                                     ))}
                                 </div>
                             </div>
-                        )}
+                        )}  
                     </GridItem>
 
                     {results && (

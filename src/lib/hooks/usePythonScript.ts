@@ -1,42 +1,62 @@
 'use client'
 import { useState } from 'react';
 
-interface PythonScriptData {
-  file_content: string;
+interface PredictionResult {
+    id: string;
+    subject: string;
+    amount: number;
+    quantity: number;
+    suspicion_percentage: number;
+    suspicion_level: 'High' | 'Medium' | 'Low';
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api/analysis';
+interface AnalysisResponse {
+    success: boolean;
+    predictions?: PredictionResult[];
+    error?: string;
+    execution_time: number;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 export function usePythonScript() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const runScript = async (data: PythonScriptData) => {
-    setLoading(true);
-    setError(null);
+    const runScript = async (file: File): Promise<AnalysisResponse> => {
+        setLoading(true);
+        setError(null);
 
-    try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
 
-      if (!response.ok) {
-        throw new Error('Failed to execute Python script');
-      }
+            const response = await fetch(`${API_URL}/analyze`, {
+                method: 'POST',
+                body: formData,
+            });
 
-      const result = await response.json();
-      setLoading(false);
-      return result;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
-      setLoading(false);
-      throw err;
-    }
-  };
+            const result = await response.json();
+            
+            if (!response.ok) {
+                const errorMessage = typeof result.detail === 'object' 
+                    ? result.detail.error 
+                    : (result.detail || 'Failed to execute analysis');
+                    
+                throw new Error(errorMessage);
+            }
 
-  return { runScript, loading, error };
+            setLoading(false);
+            return {
+                ...result,
+                execution_time: typeof result.execution_time === 'number' ? result.execution_time : 0
+            };
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Unknown error occurred');
+            setLoading(false);
+            throw err;
+        }
+    };
+
+    return { runScript, loading, error };
 } 
