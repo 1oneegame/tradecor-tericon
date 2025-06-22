@@ -8,6 +8,7 @@ interface PredictionResult {
     quantity: number;
     suspicion_percentage: number;
     suspicion_level: 'High' | 'Medium' | 'Low';
+    subject_link: string;   
 }
 
 interface AnalysisResponse {

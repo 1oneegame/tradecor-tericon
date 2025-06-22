@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { usePythonScript } from '@/lib/hooks/usePythonScript';
+import Link from "next/link";
 
 interface AnalysisResult {
     id: string;
@@ -13,6 +14,7 @@ interface AnalysisResult {
     quantity: number;
     suspicion_percentage: number;
     suspicion_level: 'High' | 'Medium' | 'Low';
+    subject_link: string;
 }
 
 type SortType = 'probability_asc' | 'probability_desc' | 'level';
@@ -215,6 +217,7 @@ export default function Analysis() {
                                     <h2 className="text-2xl font-bold mb-4 text-blue-800">Результаты анализа</h2>
                                     <div className="space-y-4">
                                         {filterAndSortResults(results).map((result, index) => (
+                                            
                                             <div 
                                                 key={index} 
                                                 className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
@@ -236,6 +239,19 @@ export default function Analysis() {
                                                                 <span className="text-gray-500">Сумма:</span>{' '}
                                                                 {formatAmount(result.amount)} тг
                                                             </p>
+                                                        </div>
+                                                        <div className="mt-4">
+                                                            <Link 
+                                                                href={result.subject_link || '#'}
+                                                                target="_blank"
+                                                                className="inline-block"
+                                                            >
+                                                                <Button 
+                                                                    className="bg-blue-800 hover:bg-blue-600 text-white rounded-full px-4 py-2 text-sm transition-colors duration-300"
+                                                                >
+                                                                    Перейти к закупке
+                                                                </Button>
+                                                            </Link>
                                                         </div>
                                                     </div>
                                                     <div className="ml-4 text-right">
