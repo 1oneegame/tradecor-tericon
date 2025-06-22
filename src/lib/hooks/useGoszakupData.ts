@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GoszakupRequest, GoszakupResponse } from '../types';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const useGoszakupData = () => {
     const [loading, setLoading] = useState(false);

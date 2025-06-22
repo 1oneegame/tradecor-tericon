@@ -9,7 +9,7 @@ interface AnalysisResponse {
     execution_time: number;
 }
 
-const API_URL = 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export function usePythonScript() {
     const [loading, setLoading] = useState(false);

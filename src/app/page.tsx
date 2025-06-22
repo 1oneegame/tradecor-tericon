@@ -59,50 +59,6 @@ export default function Home() {
           </GridItem>
         </Grid>
       </section>
-      <section className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-blue-800 text-center mb-12">Отзывы наших клиентов</h1>
-        <Grid columns={3} decoratorPositions={["top-left", "bottom-right"]}>
-          <GridItem className="flex flex-col gap-4">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-800 font-bold">МФ</span>
-              </div>
-              <div>
-                <h3 className="font-semibold">Министерство Финансов</h3>
-                <p className="text-sm text-gray-500">Государственный сектор</p>
-              </div>
-            </div>
-            <p className="text-gray-700">&quot;Внедрение КОРРУПТ-СКАН позволило нам выявить и предотвратить нарушения в закупочных процедурах на сумму более 2 млрд рублей за первый год использования.&quot;</p>
-          </GridItem>
-          <GridItem className="flex flex-col gap-4">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-800 font-bold">ГК</span>
-              </div>
-              <div>
-                <h3 className="font-semibold">Газнефтьком</h3>
-                <p className="text-sm text-gray-500">Энергетический сектор</p>
-              </div>
-            </div>
-            <p className="text-gray-700">&quot;Система помогла нам стандартизировать процессы закупок и значительно снизить риски коррупционных схем. Особенно ценим возможность раннего выявления аффилированности.&quot;</p>
-          </GridItem>
-          <GridItem className="flex flex-col gap-4">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-800 font-bold">РЖ</span>
-              </div>
-              <div>
-                <h3 className="font-semibold">РосЖелДор</h3>
-                <p className="text-sm text-gray-500">Транспортная отрасль</p>
-              </div>
-            </div>
-            <p className="text-gray-700">&quot;КОРРУПТ-СКАН стал незаменимым инструментом для нашей службы внутреннего аудита. Автоматический анализ закупок экономит сотни человеко-часов ежемесячно.&quot;</p>
-          </GridItem>
-        </Grid>
-        <div className="mt-12 text-center">
-          <Button className="bg-blue-800 hover:bg-blue-900 text-white px-8 py-2">Запросить демо-доступ</Button>
-        </div>
-      </section>
     </div>
   );
 }
