@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const links = [
   {
@@ -23,24 +24,36 @@ export default function Navigation() {
   const pathname = usePathname();
 
   return (
-    <div className={`h-[70px] fixed top-2 left-0 right-0 z-50 flex flex-row items-center justify-between px-24 py-2 bg-transparent text-blue-800 transition-opacity duration-300`}>
+    <div className="h-16 fixed top-4 left-0 right-0 z-50 flex flex-row items-center justify-between px-6 mx-6">
+      <div className="bg-white/80 backdrop-blur-lg border border-gray-200/50 rounded-2xl shadow-sm px-6 py-3 flex flex-row items-center justify-between w-full max-w-6xl mx-auto">
         <div className="flex flex-row gap-4 items-center justify-center">
-            <h1 className="text-2xl font-bold">TradeCor</h1>
+          <Link href="/" className="flex items-center">
+            <Image 
+              src="/tradecor.svg" 
+              alt="TradeCor Logo" 
+              width={120} 
+              height={30}
+              className="h-8 w-auto"
+            />
+          </Link>
         </div>
-        <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-row gap-9 items-center justify-center border-2 border-gray-200 rounded-full bg-white px-4 py-1">
-            {links.map((link) => (
-              <div key={link.href} className="w-full h-full flex items-center justify-center">
-                  <Link key={link.href} href={link.href} className={`text-blue-800 hover:text-blue-600 w-full h-full flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors duration-300 text-md px-4 py-1 ${pathname === link.href && "border border-blue-800"}`}>
-                  {link.label}
-                  </Link>
-              </div>
-            ))}
+        
+        <div className="flex flex-row gap-1 items-center justify-center bg-gray-50 rounded-xl p-1">
+          {links.map((link) => (
+            <Link 
+              key={link.href} 
+              href={link.href} 
+              className={`text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200 ${
+                pathname === link.href 
+                  ? "bg-white text-gray-900 shadow-sm" 
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
-        <div className="flex flex-row gap-4 items-center justify-center">
-            <Button className="rounded-full text-white bg-blue-800 hover:bg-blue-900 transition-colors duration-300">
-                Личный кабинет
-            </Button>
-        </div>
+      </div>
     </div>
   )
 }
