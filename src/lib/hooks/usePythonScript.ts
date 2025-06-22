@@ -1,15 +1,6 @@
 'use client'
 import { useState } from 'react';
-
-interface PredictionResult {
-    id: string;
-    subject: string;
-    amount: number;
-    quantity: number;
-    suspicion_percentage: number;
-    suspicion_level: 'High' | 'Medium' | 'Low';
-    subject_link: string;   
-}
+import { PredictionResult } from '@/lib/types';
 
 interface AnalysisResponse {
     success: boolean;
@@ -18,7 +9,7 @@ interface AnalysisResponse {
     execution_time: number;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_URL = 'http://localhost:8000';
 
 export function usePythonScript() {
     const [loading, setLoading] = useState(false);
