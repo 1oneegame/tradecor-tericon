@@ -17,6 +17,10 @@ export default function DataPage() {
         const saved = localStorage.getItem('selectedLots');
         return saved ? JSON.parse(saved) : [];
     });
+    const [selectedLotsData, setSelectedLotsData] = useState<AnalysisResult[]>(() => {
+        const saved = localStorage.getItem('selectedLotsData');
+        return saved ? JSON.parse(saved) : [];
+    });
 
     useEffect(() => {
         loadData();
@@ -25,6 +29,10 @@ export default function DataPage() {
     useEffect(() => {
         localStorage.setItem('selectedLots', JSON.stringify(selectedLots));
     }, [selectedLots]);
+
+    useEffect(() => {
+        localStorage.setItem('selectedLotsData', JSON.stringify(selectedLotsData));
+    }, [selectedLotsData]);
 
     const loadData = async () => {
         try {
@@ -42,36 +50,27 @@ export default function DataPage() {
     };
 
     const toggleLotSelection = (lotId: string) => {
-        setSelectedLots(prev => {
-            if (prev.includes(lotId)) {
-                return prev.filter(id => id !== lotId);
-            } else {
-                return [...prev, lotId];
+        if (selectedLots.includes(lotId)) {
+            setSelectedLots(selectedLots.filter(id => id !== lotId));
+            setSelectedLotsData(selectedLotsData.filter(lot => lot.lot_id !== lotId));
+        } else {
+            const lotData = results.find(result => result.lot_id === lotId);
+            if (lotData) {
+                setSelectedLots([...selectedLots, lotId]);
+                setSelectedLotsData([...selectedLotsData, lotData]);
             }
-        });
+        }
     };
 
     const handleAnalyzeSelected = () => {
-        if (selectedLots.length === 0) {
+        if (selectedLotsData.length === 0) {
             alert('Пожалуйста, выберите хотя бы один лот для анализа');
             return;
         }
         
-        const selectedLotsData = results
-            .filter(result => selectedLots.includes(result.lot_id))
-            .map(lot => ({
-                lot_id: lot.lot_id,
-                announcement: lot.announcement,
-                customer: lot.customer,
-                subject: lot.subject,
-                subject_link: lot.subject_link,
-                quantity: lot.quantity,
-                amount: lot.amount,
-                purchase_type: lot.purchase_type,
-                status: lot.status
-            }));
-        
         localStorage.setItem('selectedLotsForAnalysis', JSON.stringify(selectedLotsData));
+        setSelectedLots([]);
+        setSelectedLotsData([]);
         router.push('/analysis');
     };
 
@@ -82,10 +81,10 @@ export default function DataPage() {
                     <GridItem>
                         <div className="flex justify-between items-center mb-8">
                             <h1 className="text-4xl font-bold text-blue-800">Данные закупок</h1>
-                            {selectedLots.length > 0 && (
+                            {selectedLotsData.length > 0 && (
                                 <div className="flex items-center gap-4">
                                     <span className="text-gray-600">
-                                        Выбрано лотов: {selectedLots.length}
+                                        Выбрано лотов: {selectedLotsData.length}
                                     </span>
                                     <Button
                                         onClick={handleAnalyzeSelected}

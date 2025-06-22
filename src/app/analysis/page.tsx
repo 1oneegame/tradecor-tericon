@@ -155,6 +155,9 @@ export default function Analysis() {
             addLog('Отправка данных на сервер');
             const result = await runScript(dataToAnalyze);
             addLog('Получен ответ от сервера');
+            localStorage.removeItem('selectedLotsForAnalysis');
+            localStorage.removeItem('selectedLotsData');
+            localStorage.removeItem('selectedLots');
             console.log('Результаты анализа:', result.predictions);
 
             if (!result.success) {
